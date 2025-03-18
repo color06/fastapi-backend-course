@@ -4,34 +4,34 @@ from base_http_client import BaseHTTPClient
 
 load_dotenv()
 
-if not all(
-    [
-        os.getenv("CLOUDFLARE_API_TOKEN"),
-        os.getenv("CLOUDFLARE_ACCOUNT_ID"),
-        os.getenv("CLOUDFLARE_MODEL"),
-    ]
-):
-    raise ValueError("❌ Ошибка: Отсутствуют переменные окружения в .env!")
+
+class CloudFlareConfig:
+    """Конфигурация для работы с Cloudflare API."""
+    
+    def __init__(self):
+        self.api_token = os.getenv("CLOUDFLARE_API_TOKEN")
+        self.account_id = os.getenv("CLOUDFLARE_ACCOUNT_ID")
+        self.model = os.getenv("CLOUDFLARE_MODEL")
+
+        if not all([self.api_token, self.account_id, self.model]):
+            raise ValueError("❌ Ошибка: Отсутствуют переменные окружения в .env!")
 
 
 class CloudflareAI(BaseHTTPClient):
     """Клиент для работы с Cloudflare AI."""
 
-    def __init__(self):
+    def __init__(self, config: CloudFlareConfig):
         super().__init__()
-        self.api_key = os.getenv("CLOUDFLARE_API_TOKEN")
-        account_id = os.getenv("CLOUDFLARE_ACCOUNT_ID")
-        model_name = os.getenv("CLOUDFLARE_MODEL")
-
-        if not self.api_key or not account_id or not model_name:
-            raise ValueError("❌ Ошибка: Отсутствуют переменные окружения в .env!")
-
-        self.api_url = f"https://api.cloudflare.com/client/v4/accounts/{account_id}/ai/run/@cf/meta/{model_name}"
+        self.config = config
+        self.api_url = (
+            f"https://api.cloudflare.com/client/v4/accounts/"
+            f"{self.config.account_id}/ai/run/@cf/meta/{self.config.model}"
+        )
 
     def get_headers(self) -> dict:
         """Возвращает заголовки запроса."""
         return {
-            "Authorization": f"Bearer {self.api_key}",
+            "Authorization": f"Bearer {self.config.api_token}",
             "Content-Type": "application/json",
         }
 
@@ -61,3 +61,8 @@ class CloudflareAI(BaseHTTPClient):
         except Exception as e:
             print(f"❌ Ошибка запроса к Cloudflare AI: {e}")
             return "❌ Ошибка: Невозможно получить ответ от Cloudflare AI."
+
+
+
+cloudflare_config = CloudFlareConfig()
+ai_client = CloudflareAI(cloudflare_config)

@@ -5,23 +5,29 @@ from base_http_client import BaseHTTPClient
 load_dotenv()
 
 
+class JSONBinConfig:
+    """Конфигурация для работы с JSONBin.io."""
+
+    def __init__(self):
+        self.api_key = os.getenv("JSONBIN_API_KEY")
+        self.bin_id = os.getenv("JSONBIN_BIN_ID")
+
+        if not all([self.api_key, self.bin_id]):
+            raise ValueError("❌ Ошибка: Отсутствуют переменные окружения в .env!")
+
+
 class JSONBinClient(BaseHTTPClient):
     """Клиент для работы с JSONBin.io."""
 
-    def __init__(self):
+    def __init__(self, config: JSONBinConfig):
         super().__init__()
-        self.api_key = os.getenv("JSONBIN_API_KEY")
-        bin_id = os.getenv("JSONBIN_BIN_ID")
-
-        if not all([self.api_key, bin_id]):
-            raise ValueError("❌ Ошибка: Отсутствуют переменные окружения в .env!")
-
-        self.api_url = f"https://api.jsonbin.io/v3/b/{bin_id}"
+        self.config = config
+        self.api_url = f"https://api.jsonbin.io/v3/b/{self.config.bin_id}"
 
     def get_headers(self) -> dict:
         """Возвращает заголовки запроса."""
         return {
-            "X-Master-Key": self.api_key,
+            "X-Master-Key": self.config.api_key,
             "Content-Type": "application/json",
         }
 

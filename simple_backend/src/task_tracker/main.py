@@ -1,11 +1,16 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import Dict, List
-from cloudflare_ai import CloudflareAI
-from jsonbin_client import JSONBinClient
+from cloudflare_ai import CloudflareAI, CloudFlareConfig
+from jsonbin_client import JSONBinClient, JSONBinConfig
 
 app = FastAPI()
-ai = CloudflareAI()
+
+cloudflare_config = CloudFlareConfig()
+jsonbin_config = JSONBinConfig()
+
+ai = CloudflareAI(config=cloudflare_config)
+storage_client = JSONBinClient(config=jsonbin_config)
 
 
 class TaskManager:
@@ -63,7 +68,7 @@ class TaskManager:
         return {"message": "Задача удалена"}
 
 
-task_manager = TaskManager(JSONBinClient())
+task_manager = TaskManager(storage_client)
 
 
 class Task(BaseModel):
