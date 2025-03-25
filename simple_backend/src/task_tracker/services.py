@@ -21,7 +21,9 @@ class TaskManager:
             self.tasks = self.tasks["record"]
 
         if not isinstance(self.tasks, list):
-            raise ValueError("❌ Ошибка: self.tasks не является списком!")
+            raise ValueError(
+                f"❌ Ошибка: self.tasks не является списком. Получено: {self.tasks}"
+            )
 
         self.task_id_counter = max((task["id"] for task in self.tasks), default=0) + 1
 
